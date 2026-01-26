@@ -52,7 +52,14 @@ on:
         required: false
         default: true
         type: boolean
-       
+
+               
+      enable_hymo:
+        description: "添加Hymo实现(高性能混合挂载元模块)"
+        required: false
+        default: true
+        type: boolean
+
 
 
 jobs:
@@ -336,6 +343,16 @@ jobs:
           cp ./SukiSU_patch/69_hide_stuff.patch ./common/
           cd ./common
           patch -p1 < 50_add_susfs_in_gki-android15-6.6.patch || true
+            if [ "${{ env.ENABLE_HYMO }}" = "true" ]; then
+            echo "添加Hymo-高性能混合挂载元模块"
+            wget https://raw.githubusercontent.com/cctv18/HymoFS/refs/heads/android15_6.6/patch/hymofs_with_susfs.patch
+            patch -p1 -F 3 < hymofs_with_susfs.patch
+            echo "CONFIG_HYMOFS=y" >> ./arch/arm64/configs/gki_defconfig
+          fi
+
+
+
+          
           if [ "${{ env.ENABLE_UNICODE_BYPASS }}" = "true" ]; then
             cp "${GITHUB_WORKSPACE}/.github/workflows/Bin/unicode_bypass_fix.patch" ./
             echo "📦 正在应用Unicode零宽绕过修复补丁..."
